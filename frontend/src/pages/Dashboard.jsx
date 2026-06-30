@@ -17,7 +17,7 @@ function Dashboard() {
   });
 
 useEffect(() => {
-  fetch("http://localhost:8000/dashboard")
+     fetch("/api/dashboard")
     .then((response) => response.json())
     .then((data) => {
       setDashboardData(data);
