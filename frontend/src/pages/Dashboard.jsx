@@ -1,7 +1,7 @@
 import DashboardLayout from "../layouts/DashboardLayout";
-import StatCard from "../components/StatCard";
-import QuickActions from "../components/QuickActions";
-import RecentActivity from "../components/RecentActivity";
+import StatCard from "../components/dashboard/StatCard";
+import QuickActions from "../components/dashboard/QuickActions";
+import RecentActivity from "../components/dashboard/RecentActivity";
 
 function Dashboard() {
   return (
