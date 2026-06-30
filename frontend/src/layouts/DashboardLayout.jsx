@@ -4,7 +4,7 @@ import Footer from "../components/layout/Footer";
 
 function DashboardLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-slate-950">
       <Sidebar />
 
       <div className="flex flex-1 flex-col">

@@ -1,24 +1,30 @@
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
+
 function Navbar() {
+  const { dark, setDark } = useTheme();
+
   return (
-    <header className="flex items-center justify-between bg-white px-6 py-4 shadow">
-      <h2 className="text-2xl font-bold text-gray-800">
+    <header className="flex items-center justify-between px-6 py-4 shadow
+      bg-white text-gray-900
+      dark:bg-slate-900 dark:text-white">
+
+      <h2 className="text-2xl font-bold">
         Dashboard
       </h2>
 
       <div className="flex items-center gap-4">
-        <button className="rounded-lg bg-slate-100 px-4 py-2 hover:bg-slate-200">
-          🔔 Notifications
+
+        <button
+          onClick={() => setDark(!dark)}
+          className="flex items-center gap-2 rounded-lg px-4 py-2
+          bg-gray-100 hover:bg-gray-200
+          dark:bg-slate-800 dark:hover:bg-slate-700"
+        >
+          {dark ? <Sun size={18} /> : <Moon size={18} />}
+          {dark ? "Light" : "Dark"}
         </button>
 
-        <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold">
-            S
-          </div>
-
-          <span className="font-medium text-gray-700">
-            Salim
-          </span>
-        </div>
       </div>
     </header>
   );

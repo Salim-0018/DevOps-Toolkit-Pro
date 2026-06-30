@@ -7,7 +7,7 @@ function RecentActivity() {
   ];
 
   return (
-    <div className="mt-8 rounded-xl bg-white p-6 shadow-md">
+    <div className="mt-8 rounded-xl bg-white p-6 shadow-md dark:bg-slate-900 dark:text-white">
       <h2 className="mb-4 text-xl font-bold text-gray-800">
         Recent Activity
       </h2>
