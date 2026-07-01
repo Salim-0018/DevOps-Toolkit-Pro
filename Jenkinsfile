@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_USER = "paul48"
+        BACKEND_IMAGE = "devops-backend"
+        FRONTEND_IMAGE = "devops-frontend"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -10,15 +16,29 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Images') {
             steps {
-                sh 'docker compose build'
+                sh """
+                docker build -t $DOCKERHUB_USER/$BACKEND_IMAGE ./backend
+                docker build -t $DOCKERHUB_USER/$FRONTEND_IMAGE ./frontend
+                """
             }
         }
 
-        stage('Deploy') {
+        stage('Login & Push to DockerHub') {
             steps {
-                sh 'docker compose up -d'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'USER',
+                    passwordVariable: 'PASS'
+                )]) {
+                    sh """
+                    echo $PASS | docker login -u $USER --password-stdin
+
+                    docker push $USER/$BACKEND_IMAGE
+                    docker push $USER/$FRONTEND_IMAGE
+                    """
+                }
             }
         }
     }
