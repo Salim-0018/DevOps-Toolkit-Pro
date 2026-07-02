@@ -15,6 +15,5 @@ A production-ready Full Stack DevOps platform.
 - Grafana
 
 ## Status
-a
 Day 1 - Project Initialized 🚀
 fsw464e
