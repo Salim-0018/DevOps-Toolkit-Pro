@@ -17,6 +17,3 @@ A production-ready Full Stack DevOps platform.
 ## Status
 a
 Day 1 - Project Initialized 🚀
-day2
-day 3
-day 4
