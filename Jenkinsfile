@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/Salim-0018/DevOps-Toolkit-Pro.git'
+                    url: 'https://github.com/Salim-0018/DevOps-Toolkit-Pro.git'
             }
         }
 
@@ -15,3 +15,4 @@ pipeline {
             }
         }
     }
+}
