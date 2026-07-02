@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarQube 'SonarScanner'
-    }
-
     environment {
         DOCKERHUB_USER = "paul48"
         BACKEND_IMAGE = "devops-backend"
@@ -22,14 +18,17 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    sonar-scanner \
-                      -Dsonar.projectKey=DevOps-Toolkit-Pro \
-                      -Dsonar.projectName=DevOps-Toolkit-Pro \
-                      -Dsonar.sources=. \
-                      -Dsonar.sourceEncoding=UTF-8
-                    '''
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                          -Dsonar.projectKey=DevOps-Toolkit-Pro \
+                          -Dsonar.projectName=DevOps-Toolkit-Pro \
+                          -Dsonar.sources=. \
+                          -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
                 }
             }
         }
@@ -50,7 +49,6 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-
                     sh '''
                     echo $PASS | docker login -u $USER --password-stdin
 
@@ -82,19 +80,19 @@ pipeline {
 
     post {
         success {
-            echo '====================================='
-            echo 'Pipeline completed successfully!'
-            echo 'Code Checked by SonarQube'
-            echo 'Docker Images Built & Pushed'
-            echo 'Application Deployed to Kubernetes'
-            echo '====================================='
+            echo "=================================="
+            echo "Pipeline completed successfully!"
+            echo "SonarQube Analysis Successful"
+            echo "Docker Images Built & Pushed"
+            echo "Application Deployed to Kubernetes"
+            echo "=================================="
         }
 
         failure {
-            echo '====================================='
-            echo 'Pipeline Failed!'
-            echo 'Check Jenkins Console Output'
-            echo '====================================='
+            echo "=================================="
+            echo "Pipeline Failed!"
+            echo "Check Jenkins Console Output"
+            echo "=================================="
         }
     }
 }
