@@ -1,51 +1,114 @@
 import { useEffect, useState } from "react";
-import { getCpuData } from "../../../api/dashboardApi";
 import {
+  ResponsiveContainer,
   LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
-function generateData() {
-  return [
-    { time: "10:00", usage: Math.floor(Math.random() * 100) },
-    { time: "10:10", usage: Math.floor(Math.random() * 100) },
-    { time: "10:20", usage: Math.floor(Math.random() * 100) },
-    { time: "10:30", usage: Math.floor(Math.random() * 100) },
-    { time: "10:40", usage: Math.floor(Math.random() * 100) },
-  ];
-}
+import { MemoryStick } from "lucide-react";
+import { getMemoryData } from "../../../api/dashboardApi";
 
-function CpuChart() {
-  const [data, setData] = useState(generateData());
+function MemoryChart() {
+  const [data, setData] = useState([]);
 
   useEffect(() => {
+    setData(getMemoryData());
+
     const interval = setInterval(() => {
-      setData(getCpuData());
+      setData(getMemoryData());
     }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-md mt-6">
-      <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-white">
-        CPU Usage (Live)
-      </h2>
+  const latest =
+    data.length > 0 ? data[data.length - 1].usage : 0;
 
-      <ResponsiveContainer width="100%" height={250}>
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl transition-all duration-300 hover:shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+
+      {/* Header */}
+
+      <div className="mb-6 flex items-center justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <div className="rounded-2xl bg-gradient-to-br from-fuchsia-500 to-violet-600 p-4 text-white">
+
+            <MemoryStick size={28} />
+
+          </div>
+
+          <div>
+
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              Memory Usage
+            </h2>
+
+            <p className="text-sm text-slate-500">
+              Live RAM Performance
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="text-right">
+
+          <h3 className="text-3xl font-black text-violet-600">
+            {latest}%
+          </h3>
+
+          <span className="text-xs text-emerald-500">
+            ● Live
+          </span>
+
+        </div>
+
+      </div>
+
+      {/* Chart */}
+
+      <ResponsiveContainer width="100%" height={280}>
+
         <LineChart data={data}>
-          <XAxis dataKey="time" />
+
+          <CartesianGrid
+            strokeDasharray="4 4"
+            stroke="#334155"
+            opacity={0.2}
+          />
+
+          <XAxis
+            dataKey="time"
+            tick={{ fontSize: 12 }}
+          />
+
           <YAxis />
+
           <Tooltip />
-          <Line type="monotone" dataKey="usage" stroke="#3b82f6" />
+
+          <Line
+            type="monotone"
+            dataKey="usage"
+            stroke="#a855f7"
+            strokeWidth={4}
+            dot={false}
+            activeDot={{
+              r: 6,
+            }}
+          />
+
         </LineChart>
+
       </ResponsiveContainer>
+
     </div>
   );
 }
 
-export default CpuChart;
+export default MemoryChart;

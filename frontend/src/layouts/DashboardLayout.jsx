@@ -4,18 +4,29 @@ import Footer from "../components/layout/Footer";
 
 function DashboardLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-slate-950">
+    <div className="flex min-h-screen bg-slate-100 dark:bg-slate-950">
+
+      {/* Sidebar */}
       <Sidebar />
 
+      {/* Main Section */}
       <div className="flex flex-1 flex-col">
+
+        {/* Top Navbar */}
         <Navbar />
 
-        <main className="flex-1 p-6">
-          {children}
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="mx-auto w-full max-w-7xl">
+            {children}
+          </div>
         </main>
 
+        {/* Footer */}
         <Footer />
+
       </div>
+
     </div>
   );
 }

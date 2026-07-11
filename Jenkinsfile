@@ -1,98 +1,42 @@
-pipeline {
-    agent any
+FROM jenkins/jenkins:lts-jdk21
 
-    environment {
-        DOCKERHUB_USER = "paul48"
-        BACKEND_IMAGE = "devops-backend"
-        FRONTEND_IMAGE = "devops-frontend"
-    }
+USER root
 
-    stages {
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    docker.io \
+    git \
+    curl \
+    wget \
+    gnupg \
+    lsb-release \
+    apt-transport-https \
+    ca-certificates && \
+    apt-get clean
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/salim-0018/DevOps-Toolkit-Pro.git'
-            }
-        }
+# Docker group
+RUN groupmod -g 1001 docker && \
+    usermod -aG docker jenkins
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey=DevOps-Toolkit-Pro \
-                          -Dsonar.projectName=DevOps-Toolkit-Pro \
-                          -Dsonar.sources=. \
-                          -Dsonar.sourceEncoding=UTF-8
-                        """
-                    }
-                }
-            }
-        }
+# Docker Compose Plugin
+RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
+    curl -SL https://github.com/docker/compose/releases/download/v2.39.1/docker-compose-linux-x86_64 \
+    -o /usr/local/lib/docker/cli-plugins/docker-compose && \
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-        stage('Build Docker Images') {
-            steps {
-                sh '''
-                docker build -t $DOCKERHUB_USER/$BACKEND_IMAGE:latest ./backend
-                docker build -t $DOCKERHUB_USER/$FRONTEND_IMAGE:latest ./frontend
-                '''
-            }
-        }
+# kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+    rm kubectl
 
-        stage('DockerHub Login & Push') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    sh '''
-                    echo $PASS | docker login -u $USER --password-stdin
+# Trivy
+RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
+    gpg --dearmor -o /usr/share/keyrings/trivy.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
+    > /etc/apt/sources.list.d/trivy.list && \
+    apt-get update && \
+    apt-get install -y trivy && \
+    apt-get clean
 
-                    docker push $USER/$BACKEND_IMAGE:latest
-                    docker push $USER/$FRONTEND_IMAGE:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                kubectl rollout restart deployment/backend -n devops-toolkit
-                kubectl rollout restart deployment/frontend -n devops-toolkit
-                '''
-            }
-        }
-
-        stage('Wait for Rollout') {
-            steps {
-                sh '''
-                kubectl rollout status deployment/backend -n devops-toolkit
-                kubectl rollout status deployment/frontend -n devops-toolkit
-                '''
-            }
-        }
-    }
-
-    post {
-        success {
-            echo "=================================="
-            echo "Pipeline completed successfully!"
-            echo "SonarQube Analysis Successful"
-            echo "Docker Images Built & Pushed"
-            echo "Application Deployed to Kubernetes"
-            echo "=================================="
-        }
-
-        failure {
-            echo "=================================="
-            echo "Pipeline Failed!"
-            echo "Check Jenkins Console Output"
-            echo "=================================="
-        }
-    }
-}
+USER jenkins
