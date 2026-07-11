@@ -23,7 +23,16 @@ function KubernetesDashboard() {
   const [services, setServices] = useState([]);
   const [namespaces, setNamespaces] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState("");
+
+
   const loadData = async () => {
+
+     setLoading(true);
+     setError("");
+
     try {
       const [
         clusterData,
@@ -47,10 +56,17 @@ function KubernetesDashboard() {
       setDeployments(deploymentsData);
       setServices(servicesData);
       setNamespaces(namespacesData);
+      setLastUpdated(new Date().toLocaleTimeString());     
+
     } catch (err) {
       console.error(err);
+      setError("Failed to load Kubernetes data");
+ 
+    } finally {
+      setLoading(false);
     }
-  };
+
+};
 
   useEffect(() => {
     loadData();
@@ -59,6 +75,38 @@ function KubernetesDashboard() {
 
     return () => clearInterval(interval);
   }, []);
+
+  if (loading) {
+  return (
+     <div className="mb-6 flex items-center justify-between">
+  <h2 className="text-2xl font-bold">
+    Kubernetes Connected ✅
+  </h2>
+
+  <button
+    onClick={loadData}
+    className="rounded-lg bg-cyan-600 px-4 py-2 text-white hover:bg-cyan-700"
+  >
+    Refresh
+  </button>
+</div>
+
+<p className="mb-6 text-sm text-slate-500">
+  Last Updated: {lastUpdated}
+</p>
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div className="p-10 text-center">
+      <h2 className="text-2xl font-bold text-red-600">
+        {error}
+      </h2>
+    </div>
+  );
+}
 
   return (
     <div>
