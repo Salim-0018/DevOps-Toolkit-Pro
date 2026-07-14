@@ -15,15 +15,36 @@ import DockerTable from "../components/docker/DockerTable";
 function Dashboard() {
 
   const [dashboardData, setDashboardData] = useState({
-    servers: 0,
-    docker: 0,
-    kubernetes: 0,
-    jenkins: 0,
-    cpu: 0,
-    memory: 0,
-    disk: "0%",
-    network: "Healthy",
-  });
+
+  servers: 0,
+  docker: 0,
+  kubernetes: 0,
+  jenkins: 0,
+
+  pods: 0,
+  runningPods: 0,
+  nodes: 0,
+  namespaces: 0,
+  deployments: 0,
+  services: 0,
+
+  network: "Healthy",
+
+  kubeOverview: {
+    nodes: 0,
+    pods: 0,
+    runningPods: 0,
+    namespaces: 0,
+    deployments: 0,
+    services: 0
+  },
+
+  cpu: 0,
+  memory: 0,
+  disk: "0%",
+  network: "Healthy",
+
+});
 
   useEffect(() => {
 
@@ -36,6 +57,16 @@ function Dashboard() {
         const data = await res.json();
 
         setDashboardData(data);
+
+      const kubeRes = await fetch("/api/kubernetes/overview");
+
+      const kubeData = await kubeRes.json();
+
+       setDashboardData(prev => ({
+      ...prev,
+       kubeOverview: kubeData
+     }));
+
 
       } catch (err) {
 
@@ -58,6 +89,72 @@ function Dashboard() {
     <DashboardLayout>
 
       <HeroBanner />
+
+
+      {/* ========================= */}
+{/* Kubernetes Overview */}
+{/* ========================= */}
+
+<section className="mt-10">
+
+  <h2 className="text-3xl font-bold mb-6">
+    Kubernetes Overview
+  </h2>
+
+  <div className="grid gap-6 md:grid-cols-3 xl:grid-cols-6">
+
+    <div className="rounded-3xl bg-blue-500 p-6 text-white shadow-lg">
+      <h3>Nodes</h3>
+      <p className="text-3xl font-bold">
+        {dashboardData.kubeOverview.nodes}
+      </p>
+    </div>
+
+
+    <div className="rounded-3xl bg-cyan-500 p-6 text-white shadow-lg">
+      <h3>Pods</h3>
+      <p className="text-3xl font-bold">
+        {dashboardData.kubeOverview.pods}
+      </p>
+    </div>
+
+
+    <div className="rounded-3xl bg-green-500 p-6 text-white shadow-lg">
+      <h3>Running Pods</h3>
+      <p className="text-3xl font-bold">
+        {dashboardData.kubeOverview.runningPods}
+      </p>
+    </div>
+
+
+    <div className="rounded-3xl bg-purple-500 p-6 text-white shadow-lg">
+      <h3>Namespaces</h3>
+      <p className="text-3xl font-bold">
+        {dashboardData.kubeOverview.namespaces}
+      </p>
+    </div>
+
+
+    <div className="rounded-3xl bg-orange-500 p-6 text-white shadow-lg">
+      <h3>Deployments</h3>
+      <p className="text-3xl font-bold">
+        {dashboardData.kubeOverview.deployments}
+      </p>
+    </div>
+
+
+    <div className="rounded-3xl bg-red-500 p-6 text-white shadow-lg">
+      <h3>Services</h3>
+      <p className="text-3xl font-bold">
+        {dashboardData.kubeOverview.services}
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
 
       {/* ========================= */}
       {/* Enterprise Stat Cards */}

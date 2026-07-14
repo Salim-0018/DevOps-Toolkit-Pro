@@ -23,7 +23,7 @@ const menuItems = [
   {
     title: "Docker Containers",
     icon: Container,
-    path: "/dashboard",
+    path: "/docker-containers",
   },
   {
     title: "Docker Images",

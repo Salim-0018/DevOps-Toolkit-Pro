@@ -12,10 +12,10 @@ const coreApi = kc.makeApiClient(k8s.CoreV1Api);
 const appsApi = kc.makeApiClient(k8s.AppsV1Api);
 
 async function getClusterInfo() {
-  const version = await kc.getCurrentCluster();
+  const cluster = kc.getCurrentCluster();
 
   return {
-    cluster: version?.name || "Unknown",
+    cluster: cluster?.name || "Unknown",
     status: "Connected",
   };
 }
@@ -26,12 +26,9 @@ async function getNodes() {
   return res.items.map((node) => ({
     name: node.metadata.name,
     status:
-      node.status.conditions.find(
-        (c) => c.type === "Ready"
-      )?.status === "True"
+      node.status.conditions.find((c) => c.type === "Ready")?.status === "True"
         ? "Ready"
         : "Not Ready",
-
     version: node.status.nodeInfo.kubeletVersion,
     os: node.status.nodeInfo.osImage,
     runtime: node.status.nodeInfo.containerRuntimeVersion,
@@ -80,11 +77,53 @@ async function getNamespaces() {
   }));
 }
 
+async function getPodLogs(namespace, pod) {
+  const logs = await coreApi.readNamespacedPodLog({
+    name: pod,
+    namespace,
+    tailLines: 200,
+  });
+
+   return logs.body || logs;
+}
+
 module.exports = {
   getClusterInfo,
+  getOverview,
   getNodes,
   getPods,
   getDeployments,
   getServices,
   getNamespaces,
+  getPodLogs,
 };
+
+async function getOverview() {
+
+  const nodes = await coreApi.listNode();
+  const pods = await coreApi.listPodForAllNamespaces();
+  const namespaces = await coreApi.listNamespace();
+  const deployments = await appsApi.listDeploymentForAllNamespaces();
+  const services = await coreApi.listServiceForAllNamespaces();
+
+
+  const runningPods = pods.items.filter(
+    pod => pod.status.phase === "Running"
+  );
+
+
+  return {
+    nodes: nodes.items.length,
+
+    pods: pods.items.length,
+
+    runningPods: runningPods.length,
+
+    namespaces: namespaces.items.length,
+
+    deployments: deployments.items.length,
+
+    services: services.items.length
+  };
+
+}

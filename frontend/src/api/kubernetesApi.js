@@ -29,3 +29,10 @@ export async function getNamespaces() {
   const res = await fetch(`${API}/namespaces`);
   return res.json();
 }
+export const getPodLogs = async (namespace, pod) => {
+  const res = await fetch(
+    `${API}/logs/${namespace}/${pod}`
+  );
+
+  return res.json();
+};
