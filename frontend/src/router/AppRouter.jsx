@@ -13,8 +13,9 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 import Kubernetes from "../pages/Kubernetes";
-import Jenkins from "../pages/Jenkins";
 import JenkinsJobDetails from "../pages/JenkinsJobDetails";
+import Jenkins from "../pages/Jenkins";
+import Settings from "../pages/Settings";
 
 function AppRouter() {
   return (
@@ -81,6 +82,13 @@ function AppRouter() {
           path="/jenkins/job/:name"
           element={<JenkinsJobDetails />}
          />
+         
+         <Route
+          path="/settings"
+          element={<Settings />}
+         />
+       
+
 
 
       </Routes>
