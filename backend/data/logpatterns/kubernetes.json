@@ -1,0 +1,35 @@
+[
+  {
+    "pattern": "CrashLoopBackOff",
+    "title": "CrashLoopBackOff",
+    "cause": "Application crashes repeatedly after starting.",
+    "fix": [
+      "kubectl describe pod <pod>",
+      "kubectl logs <pod>",
+      "Check environment variables",
+      "Check mounted volumes",
+      "Verify image version"
+    ]
+  },
+  {
+    "pattern": "ImagePullBackOff",
+    "title": "Image Pull Failed",
+    "cause": "Container image cannot be downloaded.",
+    "fix": [
+      "Check image name",
+      "Check image tag",
+      "docker pull image",
+      "Verify registry credentials"
+    ]
+  },
+  {
+    "pattern": "OOMKilled",
+    "title": "Out Of Memory",
+    "cause": "Container exceeded memory limit.",
+    "fix": [
+      "Increase memory limits",
+      "Check memory leak",
+      "kubectl top pod"
+    ]
+  }
+]

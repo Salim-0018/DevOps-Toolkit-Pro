@@ -1,0 +1,148 @@
+import { useRef, useState, useEffect } from "react";
+import PromptBox from "./PromptBox";
+import SuggestionCards from "./SuggestionCards";
+
+import ReactMarkdown from "react-markdown";
+
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+
+export default function ChatWindow() {
+
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages, loading]);
+
+  const askAI = async (message) => {
+
+    if (!message.trim()) return;
+
+    setMessages(prev => [
+      ...prev,
+      {
+        role: "user",
+        content: message,
+      }
+    ]);
+
+    setLoading(true);
+
+    try {
+
+      const res = await fetch("/api/ai/ask",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          message
+        })
+      });
+
+      const data = await res.json();
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role:"assistant",
+          content:data.answer || "No response"
+        }
+      ]);
+
+    } catch(err){
+
+      setMessages(prev=>[
+        ...prev,
+        {
+          role:"assistant",
+          content:"❌ Backend Connection Failed"
+        }
+      ]);
+
+    }
+
+    setLoading(false);
+
+  };
+
+  return (
+
+    <div className="rounded-3xl bg-slate-900 p-8">
+
+      <SuggestionCards askAI={askAI}/>
+
+      <div className="mt-6 h-[500px] overflow-y-auto space-y-4 rounded-2xl bg-slate-950 p-5">
+
+        {messages.map((msg,index)=>(
+
+          <div
+            key={index}
+            className={`flex ${
+              msg.role==="user"
+                ? "justify-end"
+                : "justify-start"
+            }`}
+          >
+
+            <div
+              className={`max-w-[80%] rounded-2xl p-4 whitespace-pre-wrap ${
+                msg.role==="user"
+                ? "bg-cyan-600 text-white"
+                : "bg-slate-800 text-slate-100"
+              }`}
+            >
+              <ReactMarkdown
+              components={{
+              code({ inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || "");
+
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={oneDark}
+          language={match[1]}
+          PreTag="div"
+          {...props}
+        >
+          {String(children).replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      ) : (
+        <code className="bg-slate-700 px-1 rounded">
+          {children}
+        </code>
+      );
+    },
+  }}
+>
+  {msg.content}
+
+          </div>
+
+        ))}
+
+        {loading && (
+
+          <div className="text-cyan-400">
+            🤖 AI is thinking...
+          </div>
+
+        )}
+
+        <div ref={bottomRef}></div>
+
+      </div>
+
+      <PromptBox askAI={askAI}/>
+
+    </div>
+
+  );
+
+}

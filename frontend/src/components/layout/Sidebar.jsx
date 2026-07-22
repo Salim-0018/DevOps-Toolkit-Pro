@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Wrench,
+  Bot,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -39,6 +40,11 @@ const menuItems = [
     title: "Jenkins",
     icon: Wrench,
     path: "/jenkins",
+  },
+  {
+    title: "AI Assistant",
+    icon: Bot,
+    path: "/ai",
   },
   {
     title: "GitHub",

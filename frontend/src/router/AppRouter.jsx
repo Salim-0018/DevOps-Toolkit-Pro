@@ -7,6 +7,7 @@ import {
 
 import Dashboard from "../pages/Dashboard";
 import DockerImages from "../pages/DockerImages";
+import DockerVolumes from "../pages/DockerVolumes";
 import DockerContainers from "../pages/DockerContainers";
 import DockerContainerDetails from "../pages/DockerContainerDetails";
 import Login from "../pages/Login";
@@ -16,6 +17,8 @@ import Kubernetes from "../pages/Kubernetes";
 import JenkinsJobDetails from "../pages/JenkinsJobDetails";
 import Jenkins from "../pages/Jenkins";
 import Settings from "../pages/Settings";
+import Monitoring from "../pages/Monitoring";
+import AIAssistant from "../pages/AIAssistant";
 
 function AppRouter() {
   return (
@@ -37,9 +40,14 @@ function AppRouter() {
           element={<DockerImages />}
         />
 
-       <Route
-         path="/docker-containers"
-         element={<DockerContainers />}
+        <Route
+          path="/docker-volumes"
+          element={<DockerVolumes />}
+         />
+
+        <Route
+          path="/docker-containers"
+          element={<DockerContainers />}
         />
 
        <Route
@@ -88,7 +96,16 @@ function AppRouter() {
           element={<Settings />}
          />
        
+        <Route
+          path="/monitoring"
+          element={<Monitoring />}
+         />
 
+
+         <Route
+          path="/ai"
+          element={<AIAssistant />}
+         />
 
 
       </Routes>

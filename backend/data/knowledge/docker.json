@@ -1,0 +1,45 @@
+[
+  {
+    "keyword": "docker build failed",
+    "title": "Docker Build Failed",
+    "description": "Docker image build is failing.",
+    "solution": [
+      "Check Docker daemon is running.",
+      "Verify Dockerfile exists.",
+      "Run: docker build -t app .",
+      "Check build context."
+    ],
+    "commands": [
+      "systemctl status docker",
+      "docker build -t app .",
+      "docker images"
+    ]
+  },
+  {
+    "keyword": "docker daemon",
+    "title": "Docker Daemon Not Running",
+    "description": "Docker service is stopped.",
+    "solution": [
+      "Start Docker service.",
+      "Enable Docker on boot."
+    ],
+    "commands": [
+      "sudo systemctl start docker",
+      "sudo systemctl enable docker",
+      "docker ps"
+    ]
+  },
+  {
+    "keyword": "permission denied",
+    "title": "Docker Permission Denied",
+    "description": "Current user cannot access Docker.",
+    "solution": [
+      "Add user to docker group.",
+      "Logout and login again."
+    ],
+    "commands": [
+      "sudo usermod -aG docker $USER",
+      "newgrp docker"
+    ]
+  }
+]

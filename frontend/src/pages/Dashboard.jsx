@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -89,7 +90,31 @@ function Dashboard() {
     <DashboardLayout>
 
       <HeroBanner />
+  
+<section className="mt-8 rounded-3xl bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-700 p-8 text-white shadow-2xl">
 
+  <div className="flex items-center justify-between">
+
+    <div>
+      <h2 className="text-3xl font-bold">
+        Live Monitoring Center
+      </h2>
+
+      <p className="mt-3 text-cyan-100">
+        Monitor CPU, Memory, Disk, Docker and Kubernetes in real time.
+      </p>
+    </div>
+
+    <Link
+      to="/monitoring"
+      className="rounded-2xl bg-white px-8 py-4 font-bold text-cyan-700 hover:bg-slate-100"
+    >
+      Open Monitoring →
+    </Link>
+
+  </div>
+
+</section>
 
       {/* ========================= */}
 {/* Kubernetes Overview */}
