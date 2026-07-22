@@ -5,7 +5,7 @@ metadata:
   namespace: devops-toolkit
 
 spec:
-  replicas: 1
+  replicas: 2
 
   selector:
     matchLabels:
