@@ -1,0 +1,36 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - feature/settings
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Backend
+        run: |
+          docker build -t paul48/devops-backend:latest ./backend
+
+      - name: Push Backend
+        run: |
+          docker push paul48/devops-backend:latest
+
+      - name: Build Frontend
+        run: |
+          docker build -t paul48/devops-frontend:latest ./frontend
+
+      - name: Push Frontend
+        run: |
+          docker push paul48/devops-frontend:latest

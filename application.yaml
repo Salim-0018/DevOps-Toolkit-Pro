@@ -10,7 +10,7 @@ spec:
 
   source:
     repoURL: https://github.com/salim-0018/DevOps-Toolkit-Pro.git
-    targetRevision: main
+    targetRevision: feature/settings
     path: k8s
 
   destination:
