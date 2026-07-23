@@ -95,3 +95,20 @@ pipeline {
         }
     }
 }
+stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+        echo "🚀 Deploying Application to Kubernetes"
+
+        export KUBECONFIG=/var/jenkins_home/.kube/config
+
+        kubectl apply -f k8s/
+
+        echo "Checking Deployment Status..."
+
+        kubectl get pods -n devops-app
+
+        kubectl get svc -n devops-app
+        '''
+    }
+}
