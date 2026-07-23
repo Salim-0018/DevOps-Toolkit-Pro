@@ -84,18 +84,8 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            echo "✅ CI Pipeline Completed Successfully"
-        }
-
-        failure {
-            echo "❌ Pipeline Failed"
-        }
-    }
-}
-stage('Deploy to Kubernetes') {
+   
+   stage('Deploy to Kubernetes') {
     steps {
         sh '''
         echo "🚀 Deploying Application to Kubernetes"
@@ -110,5 +100,18 @@ stage('Deploy to Kubernetes') {
 
         kubectl get svc -n devops-app
         '''
+    }
+}
+
+
+ 
+   post {
+        success {
+            echo "✅ CI Pipeline Completed Successfully"
+        }
+
+        failure {
+            echo "❌ Pipeline Failed"
+        }
     }
 }
