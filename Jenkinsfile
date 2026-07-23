@@ -1,42 +1,97 @@
-FROM jenkins/jenkins:lts-jdk21
+pipeline {
+    agent any
 
-USER root
+    environment {
+        DOCKER_USERNAME = "paul48"
+        FRONTEND_IMAGE = "paul48/devops-toolkit-pro-frontend"
+        BACKEND_IMAGE  = "paul48/devops-toolkit-pro-backend"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
 
-# Install required packages
-RUN apt-get update && \
-    apt-get install -y \
-    docker.io \
-    git \
-    curl \
-    wget \
-    gnupg \
-    lsb-release \
-    apt-transport-https \
-    ca-certificates && \
-    apt-get clean
+    stages {
 
-# Docker group
-RUN groupmod -g 1001 docker && \
-    usermod -aG docker jenkins
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-# Docker Compose Plugin
-RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
-    curl -SL https://github.com/docker/compose/releases/download/v2.39.1/docker-compose-linux-x86_64 \
-    -o /usr/local/lib/docker/cli-plugins/docker-compose && \
-    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+        stage('Build Frontend Image') {
+            steps {
+                dir('frontend') {
+                    sh 'docker build -t $FRONTEND_IMAGE:$IMAGE_TAG .'
+                }
+            }
+        }
 
-# kubectl
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
-    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
-    rm kubectl
+        stage('Build Backend Image') {
+            steps {
+                dir('backend') {
+                    sh 'docker build -t $BACKEND_IMAGE:$IMAGE_TAG .'
+                }
+            }
+        }
 
-# Trivy
-RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
-    gpg --dearmor -o /usr/share/keyrings/trivy.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
-    > /etc/apt/sources.list.d/trivy.list && \
-    apt-get update && \
-    apt-get install -y trivy && \
-    apt-get clean
+        stage('Trivy Scan Frontend') {
+            steps {
+                sh 'trivy image $FRONTEND_IMAGE:$IMAGE_TAG || true'
+            }
+        }
 
-USER jenkins
+        stage('Trivy Scan Backend') {
+            steps {
+                sh 'trivy image $BACKEND_IMAGE:$IMAGE_TAG || true'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                sh 'docker push $FRONTEND_IMAGE:$IMAGE_TAG'
+                sh 'docker push $BACKEND_IMAGE:$IMAGE_TAG'
+            }
+        }
+
+        stage('Update Kubernetes Manifests') {
+            steps {
+                sh """
+                sed -i 's|image:.*frontend.*|image: ${FRONTEND_IMAGE}:${IMAGE_TAG}|' k8s/frontend-deployment.yaml
+                sed -i 's|image:.*backend.*|image: ${BACKEND_IMAGE}:${IMAGE_TAG}|' k8s/backend-deployment.yaml
+                """
+            }
+        }
+
+        stage('Commit Manifest Changes') {
+            steps {
+                sh '''
+                git config user.email "jenkins@local"
+                git config user.name "Jenkins"
+
+                git add k8s/
+                git commit -m "Update image tag ${IMAGE_TAG}" || true
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ CI Pipeline Completed Successfully"
+        }
+
+        failure {
+            echo "❌ Pipeline Failed"
+        }
+    }
+}
